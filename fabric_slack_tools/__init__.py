@@ -86,4 +86,4 @@ def announce_deploy(project, channel="#ops", username="DeployBot", web_hook_url=
         return inner_decorator
     return real_announce_deploy
 
-__all__ = ["send_slack_message", "announce_deploy"]
+__all__ = ["init_slack", "send_slack_message", "announce_deploy"]
