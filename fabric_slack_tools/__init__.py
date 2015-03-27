@@ -39,34 +39,43 @@ def init_slack(web_hook_url):
     global _web_hook_url
     _web_hook_url = web_hook_url
 
-def send_slack_message(text, web_hook_url=None):
+def send_slack_message(text, channel=None, username=None, web_hook_url=None):
     """
     send_slack_message - allow sending a slack message to a channel via a webhook.
     To configure a web hook:
-    - go to "Service Integrations -> Incoming WebHooks -> Add"
+    - Go to "Service Integrations -> Incoming WebHooks -> Add"
     - Copy the hook URL and use it via the web_hook_url function parameter or globally
       (so you won't have to repeat it) by calling init_slack once at the bottom
       of your fabfile
     - There is no longer need to worry about channel or username since the Slack
-      incoming hook has already taken care of it on Slack's side
+      incoming hook has already taken care of it on Slack's side, but that option
+      is still available as an override
     """
     global _web_hook_url
 
-    if web_hook_url is None:
+    if not web_hook_url:
         if _web_hook_url:
             web_hook_url = _web_hook_url
         else:
             raise ValueError("web_hook_url must be set")
 
     data = {
-        "text" : text
+        "text": text
     }
+
+    if channel:
+        # bring in the optional channel
+        data["channel"] = channel
+
+    if username:
+        # bring in the optional (bot) username
+        data["username"] = username
 
     req = urllib2.Request(web_hook_url)
     req.add_header("Content-Type", "application/json")
     urllib2.urlopen(req, json.dumps(data))
 
-def announce_deploy(project, web_hook_url=None):
+def announce_deploy(project, channel=None, username=None, web_hook_url=None):
     """
     announce_deploy - a decorator to announces a new deploy of the specificed project start,
     who started it and when. Also sends a message when the deploy ends and how long it took.
@@ -80,10 +89,12 @@ def announce_deploy(project, web_hook_url=None):
             # Get user's identity from a environment variable SLACK_IDENTITY, otherwise just get the default username
             deployment_handler = os.environ.get('SLACK_IDENTITY', getpass.getuser())
             # Send a message on deployment start...
-            send_slack_message("%s deploy started by %s on %s" % (project, deployment_handler, env.host), web_hook_url)
+            start_message = "%s deploy started by %s on %s" % (project, deployment_handler, env.host)
+            send_slack_message(start_message, channel=channel, username=username, web_hook_url=web_hook_url)
             return_value = func(*args, **kwargs)
             # ... and upon finish
-            send_slack_message("%s deploy ended by %s on %s. Took: %s" % (project, getpass.getuser(), env.host, str(datetime.datetime.utcnow() - deploy_start)))
+            end_message = "%s deploy ended by %s on %s. Took: %s" % (project, getpass.getuser(), env.host, str(datetime.datetime.utcnow() - deploy_start))
+            send_slack_message(end_message, channel=channel, username=username)
             return return_value
         return inner_decorator
     return real_announce_deploy
