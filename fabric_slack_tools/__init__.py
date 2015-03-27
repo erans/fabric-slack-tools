@@ -25,6 +25,7 @@ import functools
 import urllib2
 import datetime
 import getpass
+import os
 try:
     import simplejson as json
 except ImportError:
@@ -38,7 +39,7 @@ def init_slack(web_hook_url):
     global _web_hook_url
     _web_hook_url = web_hook_url
 
-def send_slack_message(text, channel, username="SlackMessageBot", web_hook_url=None):
+def send_slack_message(text, web_hook_url=None):
     """
     send_slack_message - allow sending a slack message to a channel via a webhook.
     To configure a web hook:
@@ -46,6 +47,8 @@ def send_slack_message(text, channel, username="SlackMessageBot", web_hook_url=N
     - Copy the hook URL and use it via the web_hook_url function parameter or globally
       (so you won't have to repeat it) by calling init_slack once at the bottom
       of your fabfile
+    - There is no longer need to worry about channel or username since the Slack
+      incoming hook has already taken care of it on Slack's side
     """
     global _web_hook_url
 
@@ -55,20 +58,15 @@ def send_slack_message(text, channel, username="SlackMessageBot", web_hook_url=N
         else:
             raise ValueError("web_hook_url must be set")
 
-    if channel is None:
-        raise ValueError("channel must be set")
-
     data = {
-        "text" : text,
-        "channel" : channel,
-        "username" : username
+        "text" : text
     }
 
     req = urllib2.Request(web_hook_url)
     req.add_header("Content-Type", "application/json")
     urllib2.urlopen(req, json.dumps(data))
 
-def announce_deploy(project, channel="#ops", username="DeployBot", web_hook_url=None):
+def announce_deploy(project, web_hook_url=None):
     """
     announce_deploy - a decorator to announces a new deploy of the specificed project start,
     who started it and when. Also sends a message when the deploy ends and how long it took.
@@ -77,11 +75,15 @@ def announce_deploy(project, channel="#ops", username="DeployBot", web_hook_url=
     def real_announce_deploy(func):
         @functools.wraps(func)
         def inner_decorator(*args, **kwargs):
-            n = datetime.datetime.utcnow()
-            send_slack_message("%s deploy started by %s on %s" % (project, getpass.getuser(), env.host), channel, username, web_hook_url)
+            # Get current time
+            deploy_start = datetime.datetime.utcnow()
+            # Get user's identity from a environment variable SLACK_IDENTITY, otherwise just get the default username
+            deployment_handler = os.environ.get('SLACK_IDENTITY', getpass.getuser())
+            # Send a message on deployment start...
+            send_slack_message("%s deploy started by %s on %s" % (project, deployment_handler, env.host), web_hook_url)
             return_value = func(*args, **kwargs)
-            send_slack_message("%s deploy ended by %s on %s. Took: %s" % (project, getpass.getuser(), env.host, str(datetime.datetime.utcnow() - n)), channel, username)
-
+            # ... and upon finish
+            send_slack_message("%s deploy ended by %s on %s. Took: %s" % (project, getpass.getuser(), env.host, str(datetime.datetime.utcnow() - deploy_start)))
             return return_value
         return inner_decorator
     return real_announce_deploy
