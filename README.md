@@ -8,9 +8,15 @@ Easily send messages during your deployments or any other Fabric command using s
 ## Slack webhook setup
 Create an incoming webhook on Slack integration configuration. There, you will be asked which user to post as and which
 channel to announce to. This means you only need send data to the webhook URL, no need for any other configuration
-on client side other than the URL itself and the message to announce
+on client side other than the URL itself and the message to announce.
+
+However, if you want to customise the `channel` and `username`, you can still do that by specifying the optional
+parameters in the `announce_deploy` annotation.
 
 ## Example fabfile
+
+- Minimal setup, with `channel` and `username` set on Slack settings:
+
 ```python
 from fabric.api import *
 from fabric_slack_tools import *
@@ -25,4 +31,15 @@ def deploy_server():
 
 
 init_slack("https://hooks.slack.com/services/XXXXXXXXX/YYYYYYYYY/ZZZZZZZZZZZZZZZZZZZZZZZZ")
+```
+
+- To announce to a specific channel or want your bot to act under a particular username, you can do:
+
+```python
+
+@roles("webserver")
+@announce_deploy("MyProject", channel="#devops", username="deployment-bot")
+def deploy_server():
+    run("do something")
+
 ```
