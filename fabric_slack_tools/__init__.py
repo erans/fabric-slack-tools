@@ -68,6 +68,7 @@ def send_slack_message(text, channel=None, username=None, web_hook_url=None):
         data["channel"] = channel
 
     if username:
+        # bring in the optional (bot) username
         data["username"] = username
 
     req = urllib2.Request(web_hook_url)
