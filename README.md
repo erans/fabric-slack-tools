@@ -10,6 +10,8 @@ Create an incoming webhook on Slack integration configuration. There, you will b
 channel to announce to. This means you only need send data to the webhook URL, no need for any other configuration
 on client side other than the URL itself and the message to announce
 
+You can always override the relevnat parameters in the code and pass the channel or username in the decorator call (see one of the examples below).
+
 ## Example fabfile
 ```python
 from fabric.api import *
@@ -21,6 +23,11 @@ def do_build():
 @roles("webserver")
 @announce_deploy("MyProject")
 def deploy_server():
+    run("do something")
+
+@roles("webserver")
+@announce_deploy("MyProject", channel="anotherchannel", username="the other bot")
+def deploy_something_else():
     run("do something")
 
 
