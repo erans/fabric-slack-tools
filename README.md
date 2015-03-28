@@ -13,7 +13,7 @@ on client side other than the URL itself and the message to announce.
 However, if you want to customise the `channel` and `username`, you can still do that by specifying the optional
 parameters in the `announce_deploy` annotation.
 
-You can always override the relevnat parameters in the code and pass the channel or username in the decorator call (see one of the examples below).
+You can always override the relevant parameters in the code and pass the channel or username in the decorator call (see one of the examples below).
 
 ## Example fabfile
 
