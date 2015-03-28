@@ -89,11 +89,17 @@ def announce_deploy(project, channel=None, username=None, web_hook_url=None):
             # Get user's identity from a environment variable SLACK_IDENTITY, otherwise just get the default username
             deployment_handler = os.environ.get('SLACK_IDENTITY', getpass.getuser())
             # Send a message on deployment start...
-            start_message = "%s deploy started by %s on %s" % (project, deployment_handler, env.host)
+            if env.host:
+                start_message = "%s deploy started by %s on %s" % (project, deployment_handler, env.host)
+            else:
+                start_message = "%s deploy started by %s" % (project, deployment_handler)
             send_slack_message(start_message, channel=channel, username=username, web_hook_url=web_hook_url)
             return_value = func(*args, **kwargs)
             # ... and upon finish
-            end_message = "%s deploy ended by %s on %s. Took: %s" % (project, deployment_handler, env.host, str(datetime.datetime.utcnow() - deploy_start))
+            if env.host:
+                end_message = "%s deploy ended by %s on %s. Took: %s" % (project, deployment_handler, env.host, str(datetime.datetime.utcnow() - deploy_start))
+            else:
+                end_message = "%s deploy ended by %s. Took: %s" % (project, deployment_handler, str(datetime.datetime.utcnow() - deploy_start))
             send_slack_message(end_message, channel=channel, username=username)
             return return_value
         return inner_decorator
