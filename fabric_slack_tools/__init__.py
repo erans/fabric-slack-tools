@@ -47,7 +47,7 @@ def send_slack_message(text, channel=None, username=None, web_hook_url=None):
     - Copy the hook URL and use it via the web_hook_url function parameter or globally
       (so you won't have to repeat it) by calling init_slack once at the bottom
       of your fabfile
-    - You an use the parameters you have used when setting up the web hook such as the channel and username, or
+    - You can use the parameters you have used when setting up the web hook such as the channel and username, or
       you can override it in the decorator call.
     """
     global _web_hook_url
