@@ -47,7 +47,7 @@ def send_slack_message(text, channel=None, username=None, web_hook_url=None):
     - Copy the hook URL and use it via the web_hook_url function parameter or globally
       (so you won't have to repeat it) by calling init_slack once at the bottom
       of your fabfile
-    - You an use the parameters you have used when setting up the web hook such as the channel and username, or 
+    - You can use the parameters you have used when setting up the web hook such as the channel and username, or
       you can override it in the decorator call.
     """
     global _web_hook_url
@@ -83,11 +83,19 @@ def announce_deploy(project, channel=None, username=None, web_hook_url=None):
         def inner_decorator(*args, **kwargs):
             deploy_start = datetime.datetime.utcnow()
             # Get user's identity from a environment variable SLACK_IDENTITY, otherwise just get the default username
-            deployer_username = os.environ.get('SLACK_IDENTITY', getpass.getuser())
-            start_message = "%s deploy started by %s on %s" % (project, deployer_username, env.host)
+            deployment_handler = os.environ.get('SLACK_IDENTITY', getpass.getuser())
+            # Send a message on deployment start...
+            if env.host:
+                start_message = "%s deployment started by %s on %s" % (project, deployment_handler, env.host)
+            else:
+                start_message = "%s deployment started by %s" % (project, deployment_handler)
             send_slack_message(start_message, channel=channel, username=username, web_hook_url=web_hook_url)
             return_value = func(*args, **kwargs)
-            end_message = "%s deploy ended by %s on %s. Took: %s" % (project, deployer_username, env.host, str(datetime.datetime.utcnow() - deploy_start))
+            # ... and upon finish
+            if env.host:
+                end_message = "%s deployment ended by %s on %s. Took: %s" % (project, deployment_handler, env.host, str(datetime.datetime.utcnow() - deploy_start))
+            else:
+                end_message = "%s deployment ended by %s. Took: %s" % (project, deployment_handler, str(datetime.datetime.utcnow() - deploy_start))
             send_slack_message(end_message, channel=channel, username=username)
             return return_value
         return inner_decorator
