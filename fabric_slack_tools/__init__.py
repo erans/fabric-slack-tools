@@ -39,7 +39,7 @@ def init_slack(web_hook_url):
     global _web_hook_url
     _web_hook_url = web_hook_url
 
-def send_slack_message(text, channel=None, username=None, web_hook_url=None):
+def send_slack_message(text, channel=None, username=None, web_hook_url=None, data={}):
     """
     send_slack_message - allow sending a slack message to a channel via a webhook.
     To configure a web hook:
@@ -58,9 +58,7 @@ def send_slack_message(text, channel=None, username=None, web_hook_url=None):
         else:
             raise ValueError("web_hook_url must be set")
 
-    data = {
-        "text": text
-    }
+    data["text"] = text
 
     if channel:
         data["channel"] = channel
