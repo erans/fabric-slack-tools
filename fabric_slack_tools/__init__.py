@@ -39,7 +39,7 @@ def init_slack(web_hook_url):
     global _web_hook_url
     _web_hook_url = web_hook_url
 
-def send_slack_message(text, channel=None, username=None, web_hook_url=None, data={}):
+def send_slack_message(text, channel=None, username=None, icon_emoji=None, web_hook_url=None, data={}):
     """
     send_slack_message - allow sending a slack message to a channel via a webhook.
     To configure a web hook:
@@ -66,11 +66,14 @@ def send_slack_message(text, channel=None, username=None, web_hook_url=None, dat
     if username:
         data["username"] = username
 
+    if icon_emoji:
+        data["icon_emoji"] = icon_emoji
+
     req = urllib2.Request(web_hook_url)
     req.add_header("Content-Type", "application/json")
     urllib2.urlopen(req, json.dumps(data))
 
-def announce_deploy(project, channel=None, username=None, web_hook_url=None):
+def announce_deploy(project, channel=None, username=None, icon_emoji=None, web_hook_url=None):
     """
     announce_deploy - a decorator to announces a new deploy of the specificed project start,
     who started it and when. Also sends a message when the deploy ends and how long it took.
@@ -87,14 +90,14 @@ def announce_deploy(project, channel=None, username=None, web_hook_url=None):
                 start_message = "%s deployment started by %s on %s" % (project, deployment_handler, env.host)
             else:
                 start_message = "%s deployment started by %s" % (project, deployment_handler)
-            send_slack_message(start_message, channel=channel, username=username, web_hook_url=web_hook_url)
+            send_slack_message(start_message, channel=channel, username=username, icon_emoji=icon_emoji, web_hook_url=web_hook_url)
             return_value = func(*args, **kwargs)
             # ... and upon finish
             if env.host:
                 end_message = "%s deployment ended by %s on %s. Took: %s" % (project, deployment_handler, env.host, str(datetime.datetime.utcnow() - deploy_start))
             else:
                 end_message = "%s deployment ended by %s. Took: %s" % (project, deployment_handler, str(datetime.datetime.utcnow() - deploy_start))
-            send_slack_message(end_message, channel=channel, username=username)
+            send_slack_message(end_message, channel=channel, username=username, icon_emoji=icon_emoji)
             return return_value
         return inner_decorator
     return real_announce_deploy

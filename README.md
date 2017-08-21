@@ -36,6 +36,11 @@ def deploy_server():
 def deploy_something_else():
     run("do something")
 
+@roles("webserver")
+@announce_deploy("MyProject", channel="anotherchannel", username="the other bot", icon_emoji=":panda_face:")
+def deploy_something_else():
+    run("do something")
+
 
 init_slack("https://hooks.slack.com/services/XXXXXXXXX/YYYYYYYYY/ZZZZZZZZZZZZZZZZZZZZZZZZ")
 ```
@@ -46,6 +51,17 @@ init_slack("https://hooks.slack.com/services/XXXXXXXXX/YYYYYYYYY/ZZZZZZZZZZZZZZZ
 
 @roles("webserver")
 @announce_deploy("MyProject", channel="#devops", username="deployment-bot")
+def deploy_server():
+    run("do something")
+
+```
+
+- To change the default webook icon to a specific emoji, you can do:
+
+```python
+
+@roles("webserver")
+@announce_deploy("MyProject", channel="#devops", username="deployment-bot", icon_emoji=":panda_face:")
 def deploy_server():
     run("do something")
 
