@@ -22,7 +22,13 @@
 
 from __future__ import absolute_import
 import functools
-import urllib2
+try:
+    # For Python 3.0 and later
+    import urllib.request
+except:
+    # Fall back to Python 2's urllib2
+    import urllib2
+
 import datetime
 import getpass
 import os
@@ -71,7 +77,7 @@ def send_slack_message(text, channel=None, username=None, icon_emoji=None, web_h
 
     req = urllib2.Request(web_hook_url)
     req.add_header("Content-Type", "application/json")
-    urllib2.urlopen(req, json.dumps(data))
+    urllib2.urlopen(req, data=json.dumps(data).encode('utf8'))
 
 def announce_deploy(project, channel=None, username=None, icon_emoji=None, web_hook_url=None):
     """
