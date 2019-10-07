@@ -24,7 +24,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="fabric-slack-tools",
-    version="0.1",
+    version="0.2",
     description="Fabric integration with Slack",
     author="Eran Sandler",
     author_email="eran@sandler.co.il",
