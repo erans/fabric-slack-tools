@@ -24,7 +24,7 @@ from __future__ import absolute_import
 import functools
 try:
     # For Python 3.0 and later
-    import urllib.request
+    import urllib.request as urllib2
 except:
     # Fall back to Python 2's urllib2
     import urllib2
